@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react'
 import SearchForm from '../components/SearchForm'
 import ShopCard from '../components/ShopCard'
+import { CATEGORIES } from '../constants/categories'
+import { API_BASE } from '../config'
 
-const API_URL = '/api/shops'
+const API_URL = `${API_BASE}/api/shops`
 
 export default function StoreList() {
   const [shops, setShops] = useState([])
-  const [categories, setCategories] = useState([])
+  const categories = CATEGORIES
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -30,21 +32,8 @@ export default function StoreList() {
     }
   }
 
-  const fetchCategories = async () => {
-    try {
-      const res = await fetch(API_URL)
-      if (!res.ok) return
-      const data = await res.json()
-      const cats = [...new Set(data.map((s) => s.category).filter(Boolean))].sort()
-      setCategories(cats)
-    } catch {
-      // ignore
-    }
-  }
-
   useEffect(() => {
     fetchShops()
-    fetchCategories()
   }, [])
 
   const handleSearch = (params) => {
@@ -65,7 +54,7 @@ export default function StoreList() {
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-800 rounded-xl p-6 mb-6">
           <p>⚠️ {error}</p>
-          <p className="text-sm mt-2">ודא שהשרת רץ על http://localhost:5000</p>
+          <p className="text-sm mt-2">ודא שה-backend רץ (מקומי: http://localhost:5001)</p>
         </div>
       )}
 
@@ -73,7 +62,7 @@ export default function StoreList() {
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-8 text-center">
           <p className="text-amber-800">לא נמצאו חנויות.</p>
           <p className="text-sm text-gray-600 mt-2">
-            הרץ <code className="bg-amber-100 px-2 py-1 rounded">npm run seed</code> בתיקיית backend להזנת נתוני דוגמה
+            הרץ <code className="bg-amber-100 px-2 py-1 rounded">npm run seed</code> בתיקיית backend להזנת חנויות נתיבות
           </p>
         </div>
       )}

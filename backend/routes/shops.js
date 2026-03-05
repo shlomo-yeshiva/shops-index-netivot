@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Shop = require('../models/Shop');
+const shopsData = require('../data/shopsData');
 
 // GET /shops - כל החנויות עם אפשרות חיפוש
 router.get('/', async (req, res) => {
@@ -52,22 +53,16 @@ router.post('/', async (req, res) => {
   }
 });
 
-// POST /shops/seed - הזנת נתוני דוגמה
+// POST /shops/seed - הזנת נתוני חנויות בנתיבות
 router.post('/seed', async (req, res) => {
   try {
     const count = await Shop.countDocuments();
     if (count > 0) {
-      return res.json({ message: 'כבר קיימות חנויות במערכת', count });
+      return res.json({ message: 'כבר קיימות חנויות במערכת. להזנה מחדש השתמש ב-node scripts/seed.js --force', count });
     }
 
-    const sampleShops = [
-      { name: 'חנות מוצרי חשמל', address: 'דרך בן גוריון 15, נתיבות', openingHours: 'א-ה 09:00-19:00, ו 09:00-14:00', phone: '08-9991234', category: 'חשמל', lat: 31.4210, lng: 34.5950 },
-      { name: 'מכולת השכונה', address: 'רחוב הרצל 22, נתיבות', openingHours: 'כל יום 07:00-22:00', phone: '08-9995678', category: 'מכולת', lat: 31.4180, lng: 34.5920 },
-      { name: 'פרפריה יופי', address: 'רחוב ויצמן 8, נתיבות', openingHours: 'א-ה 09:00-20:00', phone: '', category: 'יופי', lat: 31.4220, lng: 34.5980 }
-    ];
-
-    await Shop.insertMany(sampleShops);
-    res.status(201).json({ message: 'נוספו 3 חנויות לדוגמה', count: 3 });
+    await Shop.insertMany(shopsData);
+    res.status(201).json({ message: `נוספו ${shopsData.length} חנויות ועסקים בנתיבות`, count: shopsData.length });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

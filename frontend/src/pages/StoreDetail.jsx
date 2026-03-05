@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import MapView from '../components/MapView'
+import { API_BASE } from '../config'
 
-const API_URL = '/api/shops'
+const API_URL = `${API_BASE}/api/shops`
 
 export default function StoreDetail() {
   const { id } = useParams()
