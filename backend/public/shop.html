@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>פרטי חנות - אינדקס נתיבות</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-amber-50 min-h-screen">
+  <div class="max-w-2xl mx-auto p-6">
+    <a href="/" class="inline-block text-amber-600 hover:text-amber-800 mb-6">← חזרה לאינדקס</a>
+    <div id="loading" class="text-center py-12 text-amber-700">טוען פרטים...</div>
+    <div id="error" class="hidden bg-red-50 border border-red-200 text-red-800 rounded-xl p-6"></div>
+    <div id="detail" class="hidden bg-white rounded-xl shadow-lg p-8"></div>
+  </div>
+  <script>
+    (async function() {
+      const params = new URLSearchParams(location.search);
+      const id = params.get('id');
+      if (!id) {
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('error').textContent = 'חנות לא נמצאה';
+        document.getElementById('error').classList.remove('hidden');
+        return;
+      }
+      try {
+        const res = await fetch('/api/shops/' + id);
+        if (!res.ok) throw new Error('חנות לא נמצאה');
+        const s = await res.json();
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('detail').classList.remove('hidden');
+        function esc(t) { const d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; }
+        const mapsUrl = 'https://www.google.com/maps?q=' + (s.lat || 31.42) + ',' + (s.lng || 34.59);
+        document.getElementById('detail').innerHTML = `
+          <h1 class="text-2xl font-bold text-amber-900 mb-2">${esc(s.name)}</h1>
+          ${s.category ? '<span class="inline-block mb-4 px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm">' + esc(s.category) + '</span>' : ''}
+          <div class="space-y-4 text-gray-700">
+            ${s.address ? '<p class="flex items-start gap-2"><span>📍</span> <span>' + esc(s.address) + '</span></p>' : ''}
+            ${s.openingHours ? '<p class="flex items-start gap-2"><span>🕐</span> <span>' + esc(s.openingHours) + '</span></p>' : ''}
+            ${s.phone ? '<p class="flex items-center gap-2"><span>📞</span> <a href="tel:' + esc(s.phone) + '" class="text-amber-600 hover:underline">' + esc(s.phone) + '</a></p>' : ''}
+            <p class="flex items-center gap-2 pt-4">
+              <a href="${mapsUrl}" target="_blank" rel="noopener" class="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700">📍 הצג במפה</a>
+            </p>
+          </div>
+        `;
+      } catch (e) {
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('error').textContent = '⚠️ ' + e.message;
+        document.getElementById('error').classList.remove('hidden');
+      }
+    })();
+  </script>
+</body>
+</html>
