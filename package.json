@@ -2,7 +2,7 @@
   "name": "shops-index-netivot",
   "private": true,
   "scripts": {
-    "build": "cd frontend && npm install && VITE_API_URL= npm run build && cd ../backend && mkdir -p public && cp -r ../frontend/dist/* public/ && npm install",
+    "build": "cd backend && npm install && mkdir -p public",
     "start": "cd backend && node server.js"
   }
 }
