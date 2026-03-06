@@ -83,6 +83,21 @@ if (fs.existsSync(publicPath)) {
     }
     res.sendFile(path.join(publicPath, 'index.html'));
   });
+} else {
+  app.get('/', (req, res) => {
+    res.send(`
+      <!DOCTYPE html>
+      <html dir="rtl">
+      <head><meta charset="utf-8"><title>אינדקס חנויות נתיבות</title></head>
+      <body style="font-family:sans-serif;padding:2rem;text-align:center;">
+        <h1>אינדקס חנויות נתיבות</h1>
+        <p><a href="/api/shops">צפה ברשימת החניות (API)</a></p>
+        <p><a href="https://shlomo-yeshiva.github.io/shops-index-netivot/">או גלוש לאתר ב-GitHub Pages</a></p>
+        <p style="color:#666;font-size:0.9rem;">אם אתה רואה דף זה: הגדר ב-Render Root Directory ריק, Build: npm run build</p>
+      </body>
+      </html>
+    `);
+  });
 }
 
 app.listen(PORT, () => {
