@@ -77,6 +77,9 @@ app.get('/api/debug', async (req, res) => {
 const publicPath = path.join(__dirname, 'public');
 if (fs.existsSync(publicPath)) {
   app.use(express.static(publicPath));
+  app.get('/shop.html', (req, res) => {
+    res.sendFile(path.join(publicPath, 'shop.html'));
+  });
   app.get('*', (req, res) => {
     if (req.path.startsWith('/api')) {
       return res.status(404).json({ error: 'Not found' });
