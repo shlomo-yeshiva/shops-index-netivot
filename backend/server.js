@@ -1,5 +1,7 @@
 require('dotenv').config();
 const express = require('express');
+const path = require('path');
+const fs = require('fs');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const shopsRouter = require('./routes/shops');
@@ -71,6 +73,17 @@ app.get('/api/debug', async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
+
+const publicPath = path.join(__dirname, 'public');
+if (fs.existsSync(publicPath)) {
+  app.use(express.static(publicPath));
+  app.get('*', (req, res) => {
+    if (req.path.startsWith('/api')) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+    res.sendFile(path.join(publicPath, 'index.html'));
+  });
+}
 
 app.listen(PORT, () => {
   console.log(`✓ השרת רץ על http://localhost:${PORT}`);

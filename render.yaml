@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: shops-index-netivot
+    rootDir: .
+    buildCommand: npm run build
+    startCommand: npm start
+    envVars:
+      - key: MONGODB_URI
+        sync: false
+      - key: NODE_VERSION
+        value: 20
