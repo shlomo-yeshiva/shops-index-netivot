@@ -10,12 +10,18 @@ router.get('/', async (req, res) => {
     let filter = {};
 
     if (query && query.trim()) {
-      const searchRegex = new RegExp(query.trim(), 'i');
-      filter.$or = [
-        { name: searchRegex },
-        { address: searchRegex },
-        { category: searchRegex }
-      ];
+      const words = query.trim().split(/\s+/).filter(w => w.length > 0);
+      const orConditions = words.map(word => {
+        const re = new RegExp(word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+        return {
+          $or: [
+            { name: re },
+            { address: re },
+            { category: re }
+          ]
+        };
+      });
+      filter.$and = orConditions;
     }
 
     if (category && category.trim()) {
@@ -62,6 +68,21 @@ router.get('/:id', async (req, res) => {
     res.json(shop);
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// PATCH /shops/:id - עדכון חנות (תמונה וכו')
+router.patch('/:id', async (req, res) => {
+  try {
+    const shop = await Shop.findByIdAndUpdate(
+      req.params.id,
+      { $set: req.body },
+      { new: true, runValidators: true }
+    );
+    if (!shop) return res.status(404).json({ error: 'חנות לא נמצאה' });
+    res.json(shop);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
   }
 });
 

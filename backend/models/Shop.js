@@ -30,6 +30,10 @@ const shopSchema = new mongoose.Schema({
   lng: {
     type: Number,
     required: true
+  },
+  image: {
+    type: String,
+    default: ''
   }
 }, {
   timestamps: true
