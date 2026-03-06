@@ -13,7 +13,10 @@ app.use(cors());
 app.use(express.json());
 app.use('/api/shops', shopsRouter);
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/shops-index';
+let MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/shops-index';
+if (MONGODB_URI.includes('mongodb+srv://') && MONGODB_URI.includes('.net/?')) {
+  MONGODB_URI = MONGODB_URI.replace('.net/?', '.net/shops-index?');
+}
 
 mongoose.connect(MONGODB_URI, {
   serverSelectionTimeoutMS: 30000,
@@ -31,6 +34,42 @@ mongoose.connect(MONGODB_URI, {
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
+});
+
+app.get('/api/seed-shops', async (req, res) => {
+  try {
+    const force = req.query.force === '1' || req.query.force === 'true';
+    const count = await Shop.countDocuments();
+    if (count > 0 && !force) {
+      return res.json({ message: 'כבר קיימות חנויות', count });
+    }
+    if (force && count > 0) {
+      await Shop.deleteMany({});
+    }
+    await Shop.insertMany(shopsData);
+    res.json({ message: `נוספו ${shopsData.length} חנויות ועסקים בנתיבות`, count: shopsData.length });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/debug', async (req, res) => {
+  try {
+    const dbName = mongoose.connection.db?.databaseName || 'unknown';
+    const count = await Shop.countDocuments();
+    const hasUri = !!process.env.MONGODB_URI;
+    const uriHasDb = hasUri && process.env.MONGODB_URI.includes('.net/') && !process.env.MONGODB_URI.includes('.net/?');
+    res.json({
+      connected: mongoose.connection.readyState === 1,
+      dbName,
+      shopCount: count,
+      hasMongoUri: hasUri,
+      uriHasDbName: uriHasDb,
+      hint: !uriHasDb ? 'הוסף /shops-index למחרוזת לפני ? (לדוגמה: ...mongodb.net/shops-index?retryWrites=...)' : null
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 app.listen(PORT, () => {
