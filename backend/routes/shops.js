@@ -29,6 +29,29 @@ router.get('/', async (req, res) => {
   }
 });
 
+async function runSeed(force) {
+  const count = await Shop.countDocuments();
+  if (count > 0 && !force) {
+    return { message: 'כבר קיימות חנויות', count };
+  }
+  if (force && count > 0) {
+    await Shop.deleteMany({});
+  }
+  await Shop.insertMany(shopsData);
+  return { message: `נוספו ${shopsData.length} חנויות ועסקים בנתיבות`, count: shopsData.length };
+}
+
+// GET /shops/seed - חייב להיות לפני /:id
+router.get('/seed', async (req, res) => {
+  try {
+    const force = req.query.force === '1' || req.query.force === 'true';
+    const result = await runSeed(force);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // GET /shops/:id - חנות בודדת לפי ID
 router.get('/:id', async (req, res) => {
   try {
@@ -56,13 +79,9 @@ router.post('/', async (req, res) => {
 // POST /shops/seed - הזנת נתוני חנויות בנתיבות
 router.post('/seed', async (req, res) => {
   try {
-    const count = await Shop.countDocuments();
-    if (count > 0) {
-      return res.json({ message: 'כבר קיימות חנויות במערכת. להזנה מחדש השתמש ב-node scripts/seed.js --force', count });
-    }
-
-    await Shop.insertMany(shopsData);
-    res.status(201).json({ message: `נוספו ${shopsData.length} חנויות ועסקים בנתיבות`, count: shopsData.length });
+    const force = req.query.force === '1' || req.query.force === 'true';
+    const result = await runSeed(force);
+    res.status(201).json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
